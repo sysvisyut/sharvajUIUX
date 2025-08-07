@@ -28,12 +28,14 @@ class CreditScoreDataPreprocessor:
         self.label_encoders = {}
         self.feature_names = []
         self.numerical_features = [
-            'rent_on_time_rate', 'avg_utility_payment_delay', 'monthly_cashflow',
-            'savings_ratio', 'loan_repayment_consistency', 'digital_payment_activity',
-            'age', 'dependents_count'
+            'age', 'employment_stability_months', 'monthly_income', 'monthly_rent', 
+            'monthly_cashflow', 'rent_payment_consistency', 'utility_payment_consistency',
+            'phone_payment_consistency', 'insurance_payment_consistency', 'num_subscriptions',
+            'subscription_payment_consistency', 'minimum_bank_balance', 'monthly_savings',
+            'savings_goal_completion_rate', 'p2p_monthly_volume', 'risky_p2p_ratio', 'monthly_overdrafts'
         ]
-        self.categorical_features = ['education_level', 'region_type', 'employment_type']
-        self.boolean_features = ['has_existing_loans']
+        self.categorical_features = ['state', 'education_level', 'employment_type']
+        self.boolean_features = []  # No boolean features in new dataset
         
     def load_data(self, csv_path: str) -> pd.DataFrame:
         """
@@ -50,12 +52,14 @@ class CreditScoreDataPreprocessor:
             logger.info(f"Data loaded successfully. Shape: {df.shape}")
             logger.info(f"Columns found: {list(df.columns)}")
             
-            # Validate expected columns
+            # Validate expected columns for credit invisibility dataset
             expected_columns = [
-                'rent_on_time_rate', 'avg_utility_payment_delay', 'education_level',
-                'monthly_cashflow', 'savings_ratio', 'region_type', 'employment_type',
-                'has_existing_loans', 'loan_repayment_consistency', 'digital_payment_activity',
-                'age', 'dependents_count'
+                'age', 'state', 'education_level', 'employment_type', 'employment_stability_months',
+                'monthly_income', 'monthly_rent', 'monthly_cashflow', 'rent_payment_consistency',
+                'utility_payment_consistency', 'phone_payment_consistency', 'insurance_payment_consistency',
+                'num_subscriptions', 'subscription_payment_consistency', 'minimum_bank_balance',
+                'monthly_savings', 'savings_goal_completion_rate', 'p2p_monthly_volume', 'risky_p2p_ratio',
+                'monthly_overdrafts'
             ]
             
             missing_columns = set(expected_columns) - set(df.columns)
@@ -99,7 +103,7 @@ class CreditScoreDataPreprocessor:
                 # Convert to numeric, handling any string values
                 df_copy[col] = pd.to_numeric(df_copy[col], errors='coerce')
                 
-                if col in ['avg_utility_payment_delay', 'age', 'dependents_count']:
+                if col in ['avg_utility_payment_delay', 'age']:
                     # For integer columns, convert to Int64 (nullable integer)
                     df_copy[col] = df_copy[col].astype('Int64')
                 # Float columns remain as float64
@@ -152,7 +156,7 @@ class CreditScoreDataPreprocessor:
                 df_copy[col] = imputed_values[:, i]
                 
                 # Convert back to Int64 for integer columns
-                if col in ['avg_utility_payment_delay', 'age', 'dependents_count']:
+                if col in ['avg_utility_payment_delay', 'age']:
                     df_copy[col] = df_copy[col].round().astype('Int64')
         
         # Handle categorical features with mode
@@ -208,9 +212,8 @@ class CreditScoreDataPreprocessor:
         return outliers
     
     def create_feature_interactions(self, df: pd.DataFrame) -> pd.DataFrame:
-        #feasture engineering
         """
-        Create meaningful feature interactions
+        Create meaningful feature interactions for credit invisibility data
         
         Args:
             df (pd.DataFrame): Input dataframe
@@ -220,23 +223,49 @@ class CreditScoreDataPreprocessor:
         """
         df_copy = df.copy()
         
-        # Financial stability interaction
-        if 'monthly_cashflow' in df_copy.columns and 'savings_ratio' in df_copy.columns:
-            df_copy['financial_stability'] = df_copy['monthly_cashflow'] * df_copy['savings_ratio']
+        # Payment reliability score - average of all payment consistencies
+        payment_cols = ['rent_payment_consistency', 'utility_payment_consistency', 
+                       'phone_payment_consistency', 'insurance_payment_consistency',
+                       'subscription_payment_consistency']
+        available_payment_cols = [col for col in payment_cols if col in df_copy.columns]
+        if available_payment_cols:
+            df_copy['overall_payment_reliability'] = df_copy[available_payment_cols].mean(axis=1)
         
-        # Payment reliability score
-        if 'rent_on_time_rate' in df_copy.columns and 'loan_repayment_consistency' in df_copy.columns:
-            df_copy['payment_reliability'] = (df_copy['rent_on_time_rate'] + df_copy['loan_repayment_consistency']) / 2
+        # Income to rent ratio (housing affordability)
+        if 'monthly_income' in df_copy.columns and 'monthly_rent' in df_copy.columns:
+            df_copy['income_to_rent_ratio'] = df_copy['monthly_income'] / (df_copy['monthly_rent'] + 1)  # +1 to avoid division by zero
         
-        # Digital adoption & financial behavior
-        if 'digital_payment_activity' in df_copy.columns and 'savings_ratio' in df_copy.columns:
-            df_copy['digital_financial_behavior'] = df_copy['digital_payment_activity'] * df_copy['savings_ratio']
+        # Financial cushion (income minus essential expenses)
+        if 'monthly_income' in df_copy.columns and 'monthly_rent' in df_copy.columns:
+            estimated_essentials = df_copy['monthly_rent'] + 300  # rent + estimated utilities/food
+            df_copy['financial_cushion'] = (df_copy['monthly_income'] - estimated_essentials) / df_copy['monthly_income']
+            df_copy['financial_cushion'] = df_copy['financial_cushion'].clip(lower=-1, upper=1)
         
-        # Age-based financial maturity
-        if 'age' in df_copy.columns and 'savings_ratio' in df_copy.columns:
-            df_copy['age_savings_interaction'] = df_copy['age'] * df_copy['savings_ratio']
+        # Savings efficiency (how well they save relative to available income)
+        if 'monthly_savings' in df_copy.columns and 'monthly_cashflow' in df_copy.columns:
+            df_copy['savings_efficiency'] = df_copy['monthly_savings'] / (df_copy['monthly_cashflow'] + 1)
+            df_copy['savings_efficiency'] = df_copy['savings_efficiency'].clip(lower=0, upper=2)
         
-        logger.info("Feature interactions created")
+        # Risk behavior score (combines risky P2P and overdrafts)
+        risk_factors = []
+        if 'risky_p2p_ratio' in df_copy.columns:
+            risk_factors.append(df_copy['risky_p2p_ratio'])
+        if 'monthly_overdrafts' in df_copy.columns:
+            # Normalize overdrafts to 0-1 scale
+            max_overdrafts = df_copy['monthly_overdrafts'].max()
+            if max_overdrafts > 0:
+                risk_factors.append(df_copy['monthly_overdrafts'] / max_overdrafts)
+        
+        if risk_factors:
+            df_copy['risk_behavior_score'] = sum(risk_factors) / len(risk_factors)
+        
+        # Employment stability factor
+        if 'employment_stability_months' in df_copy.columns and 'age' in df_copy.columns:
+            # Normalize by age to get relative stability
+            df_copy['employment_stability_ratio'] = df_copy['employment_stability_months'] / (df_copy['age'] * 12 + 1)
+            df_copy['employment_stability_ratio'] = df_copy['employment_stability_ratio'].clip(upper=1)
+        
+        logger.info("Feature interactions created for credit invisibility data")
         return df_copy
     
     def encode_categorical_features(self, df: pd.DataFrame, fit: bool = True) -> pd.DataFrame:
@@ -252,10 +281,9 @@ class CreditScoreDataPreprocessor:
         """
         df_copy = df.copy()
         
-        # Define ordinal mappings
+        # Define ordinal mappings for credit invisibility data
         ordinal_mappings = {
-            'education_level': {'None': 0, 'Primary': 1, 'Secondary': 2, 'UG': 3, 'PG': 4, 'PhD': 5},
-            'region_type': {'Rural': 0, 'Semi-urban': 1, 'Urban': 2}  # or {'Tier-3': 0, 'Tier-2': 1, 'Tier-1': 2}
+            'education_level': {'high_school': 0, 'some_college': 1, 'bachelors': 2, 'graduate': 3}
         }
         
         # Apply ordinal encoding for ordinal features
@@ -265,7 +293,7 @@ class CreditScoreDataPreprocessor:
                 df_copy[col] = df_copy[col].fillna(0)  # Default to lowest category
         
         # One-hot encode nominal categorical features
-        nominal_features = ['employment_type']
+        nominal_features = ['employment_type', 'state']
         for col in nominal_features:
             if col in df_copy.columns:
                 if fit:
@@ -348,7 +376,12 @@ class CreditScoreDataPreprocessor:
             raise ValueError(f"train_size ({train_size}) + val_size ({val_size}) + test_size ({test_size}) must sum to 1.0")
         
         if target_column and target_column in df.columns:
-            X = df.drop(target_column, axis=1)
+            # Define all target columns to exclude from features
+            target_columns = ['credit_score', 'loan_approval']
+            available_targets = [col for col in target_columns if col in df.columns]
+            
+            # Drop all target columns from features
+            X = df.drop(available_targets, axis=1)
             y = df[target_column]
             
             # First split: separate test set
@@ -532,10 +565,7 @@ def validate_data_ranges(df: pd.DataFrame) -> Dict[str, List[str]]:
         if df['age'].min() < 18 or df['age'].max() > 100:
             issues['warnings'].append("Age values outside typical range [18,100]")
     
-    # Check dependents count (should be non-negative)
-    if 'dependents_count' in df.columns:
-        if df['dependents_count'].min() < 0:
-            issues['errors'].append("Negative dependents_count found")
+    # Removed dependents_count validation as requested
     
     return issues
 
