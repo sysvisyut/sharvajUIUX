@@ -49,17 +49,21 @@ def calculate_credit_score(row):
     elif row['education_level'] == 'UG':
         score += 15
     
-    # Employment stability
+    # Employment stability - more balanced penalties
     if row['employment_type'] == 'Salaried':
         score += 20
     elif row['employment_type'] == 'Self-employed':
         score += 10
+    elif row['employment_type'] == 'Gig':
+        score += 5  # Some income is better than none
+    elif row['employment_type'] == 'Unemployed':
+        score -= 15  # Reduced penalty for unemployment (was -25)
     
     # Digital payment activity bonus
     score += row['digital_payment_activity'] * 20
     
-    # Dependents penalty (more dependents = higher risk)
-    score -= row['dependents_count'] * 5
+    # Remove dependents penalty as requested
+    # (Dependents count no longer considered)
     
     # Ensure score is within valid range
     return max(300, min(850, int(score)))
@@ -96,11 +100,15 @@ def determine_loan_approval(row):
     elif row['savings_ratio'] < 0.1:
         approval_prob -= 0.05
     
-    # Employment type
+    # Employment type - more balanced approach
     if row['employment_type'] == 'Salaried':
-        approval_prob += 0.05
+        approval_prob += 0.10  # Higher bonus for stable employment
+    elif row['employment_type'] == 'Self-employed':
+        approval_prob += 0.05  # Moderate bonus
+    elif row['employment_type'] == 'Gig':
+        approval_prob -= 0.02  # Small penalty for irregular income
     elif row['employment_type'] == 'Unemployed':
-        approval_prob -= 0.2
+        approval_prob -= 0.15  # Reduced penalty for unemployment (was -0.30)
     
     # Existing loan management
     if row['has_existing_loans'] and not pd.isna(row['loan_repayment_consistency']):
@@ -112,8 +120,7 @@ def determine_loan_approval(row):
     # Ensure probability is within bounds
     approval_prob = max(0.05, min(0.95, approval_prob))
     
-    # Make random decision based on probability
-    return 'Yes' if np.random.rand() < approval_prob else 'No'
+    return 'Yes' if approval_prob >= 0.60 else 'No'
 
 def enhance_dataset():
     """
@@ -123,11 +130,16 @@ def enhance_dataset():
     np.random.seed(42)
     
     # Load the dataset
-    data_path = Path("../data/financial_dataset.csv")
+    data_path = Path(r"C:\FT2\CodeZilla_FT2\Model\data\financial_dataset.csv")
     print(f"Loading dataset from: {data_path}")
     
     df = pd.read_csv(data_path)
     print(f"Original dataset shape: {df.shape}")
+    
+    # Remove dependents_count column as requested
+    if 'dependents_count' in df.columns:
+        df = df.drop('dependents_count', axis=1)
+        print("Removed dependents_count column")
     
     # Handle missing values for calculation purposes
     df_calc = df.copy()
@@ -149,7 +161,19 @@ def enhance_dataset():
     
     # Determine loan approvals
     print("Determining loan approvals...")
-    df['loan_approval'] = df_calc.apply(determine_loan_approval, axis=1)
+    approval_results = []
+    for _, row in df_calc.iterrows():
+        approval = determine_loan_approval(row)
+        approval_results.append(approval)
+    
+    df['loan_approval'] = approval_results
+    
+    # Debug: Check a few examples
+    print(f"Sample credit scores: {df['credit_score'].head().values}")
+    print(f"Sample approvals: {df['loan_approval'].head().values}")
+    
+    # Check the distribution of employment types
+    print(f"Employment type distribution: {df_calc['employment_type'].value_counts()}")
     
     # Display statistics
     print("\n📊 Target Variable Statistics:")
