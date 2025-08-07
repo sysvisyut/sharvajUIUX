@@ -34,7 +34,7 @@ class CreditScoreDataPreprocessor:
             'subscription_payment_consistency', 'minimum_bank_balance', 'monthly_savings',
             'savings_goal_completion_rate', 'p2p_monthly_volume', 'risky_p2p_ratio', 'monthly_overdrafts'
         ]
-        self.categorical_features = ['state', 'education_level', 'employment_type']
+        self.categorical_features = ['state', 'education_level', 'employment_type', 'loan_approval']
         self.boolean_features = []  # No boolean features in new dataset
         
     def load_data(self, csv_path: str) -> pd.DataFrame:
@@ -289,11 +289,11 @@ class CreditScoreDataPreprocessor:
         # Apply ordinal encoding for ordinal features
         for col, mapping in ordinal_mappings.items():
             if col in df_copy.columns:
-                df_copy[col] = df_copy[col].map(mapping)
-                df_copy[col] = df_copy[col].fillna(0)  # Default to lowest category
+                df_copy[col] = df_copy[col].astype(str).map(mapping)
+                df_copy[col] = df_copy[col].fillna(0).astype(int)  # Default to lowest category and convert to int
         
         # One-hot encode nominal categorical features
-        nominal_features = ['employment_type', 'state']
+        nominal_features = ['employment_type', 'state', 'loan_approval']
         for col in nominal_features:
             if col in df_copy.columns:
                 if fit:
