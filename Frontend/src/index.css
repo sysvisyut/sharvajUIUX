@@ -1,3 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,7 +14,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Premium Tech Finance Design System */
-    --background: 0 0% 0%;
+    --background: 0 0% 0% / 0.1;
     --foreground: 0 0% 100%;
 
     --card: 0 0% 8%;
@@ -49,8 +54,8 @@ All colors MUST be HSL.
     --button-border: 0 0% 20%;
     
     /* Glass Effect */
-    --glass-bg: 0 0% 0% / 0.4;
-    --glass-border: 0 0% 100% / 0.1;
+    --glass-bg: 0 0% 0% / 0.2;
+    --glass-border: 0 0% 100% / 0.15;
 
     --sidebar-background: 0 0% 98%;
 
@@ -71,7 +76,7 @@ All colors MUST be HSL.
 
   .dark {
     /* Dark mode keeps the same premium dark design */
-    --background: 0 0% 0%;
+    --background: 0 0% 0% / 0.1;
     --foreground: 0 0% 100%;
     --card: 0 0% 8%;
     --card-foreground: 0 0% 100%;
@@ -107,7 +112,15 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-inter antialiased;
+    @apply text-foreground font-cred antialiased;
+    background: transparent;
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   html, body, #root {
@@ -118,18 +131,143 @@ All colors MUST be HSL.
 @layer utilities {
   .text-gradient-neon {
     @apply bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease-in-out infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  
+
   .glass-effect {
     background: hsla(var(--glass-bg));
     border: 1px solid hsla(var(--glass-border));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: inset 0 1px 0 0 hsla(var(--glass-border)),
+                0 8px 32px hsla(0, 0%, 0%, 0.3),
+                0 4px 16px hsla(0, 0%, 0%, 0.1);
   }
-  
+
   .glow-effect {
-    box-shadow: 0 0 20px hsla(var(--neon-blue) / 0.3),
-                0 0 40px hsla(var(--neon-purple) / 0.2),
-                0 0 60px hsla(var(--neon-pink) / 0.1);
+    box-shadow: 0 0 20px hsla(var(--neon-blue) / 0.4),
+                0 0 40px hsla(var(--neon-purple) / 0.3),
+                0 0 60px hsla(var(--neon-pink) / 0.2);
+    animation: glow-pulse 4s ease-in-out infinite;
+  }
+
+  .floating-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .nike-shadow {
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5),
+                 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .nike-button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+  }
+
+  .nike-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .nike-button:active {
+    transform: translateY(0);
+  }
+
+  .text-backdrop {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border-radius: 8px;
+    padding: 0.5rem;
+  }
+
+  .orb-blend {
+    mix-blend-mode: screen;
+  }
+
+  .dashboard-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dashboard-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 30px hsla(var(--neon-blue) / 0.2);
+  }
+
+  .score-pulse {
+    animation: score-pulse 2s ease-in-out infinite;
+  }
+
+  .badge-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .badge-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 3s infinite;
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px hsla(var(--neon-blue) / 0.4),
+                0 0 40px hsla(var(--neon-purple) / 0.3),
+                0 0 60px hsla(var(--neon-pink) / 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px hsla(var(--neon-blue) / 0.6),
+                0 0 60px hsla(var(--neon-purple) / 0.5),
+                0 0 90px hsla(var(--neon-pink) / 0.4);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes score-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
   }
 }

@@ -19,7 +19,13 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				inter: ['Inter', 'sans-serif'],
+				'nike': ['Inter', 'Roboto', 'Arial', 'sans-serif'],
+				'nike-futura': ['Inter', 'Roboto', 'Arial', 'sans-serif'],
+				'nike-helvetica': ['Roboto', 'Inter', 'Arial', 'sans-serif'],
+				'inter': ['Inter', 'sans-serif'],
+				'cred': ['Space Grotesk', 'Poppins', 'Inter', 'sans-serif'],
+				'cred-heading': ['Space Grotesk', 'Inter', 'sans-serif'],
+				'cred-body': ['Poppins', 'Inter', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
