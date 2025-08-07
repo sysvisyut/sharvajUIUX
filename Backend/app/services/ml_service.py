@@ -25,7 +25,7 @@ class MLService:
         """Use local ML model for prediction"""
         try:
             # Load model (implement your model loading logic)
-            # model = joblib.load('ml_models/credit_model.pkl')
+            # model = joblib.load('Model/models/xgboost_credit_score_model_final.joblib')
             
             # For demo, use rule-based scoring
             score_data = MLService._rule_based_scoring(financial_data)

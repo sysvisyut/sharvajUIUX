@@ -330,3 +330,35 @@ def _get_score_range(score):
         return 'Poor'
     else:
         return 'Very Poor'
+
+@api_bp.route('/ml/model-info', methods=['GET'])
+@auth_required
+def get_model_info():
+    """Get information about the ML model"""
+    try:
+        model_info = MLService.get_model_info()
+        return jsonify({
+            'success': True,
+            'data': model_info
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/ml/clear-cache', methods=['POST'])
+@auth_required  
+def clear_model_cache():
+    """Clear the ML model cache"""
+    try:
+        MLService.clear_model_cache()
+        return jsonify({
+            'success': True,
+            'message': 'Model cache cleared successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
