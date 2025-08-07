@@ -62,7 +62,7 @@ const Navigation = () => {
         >
           {[
             { name: "DASHBOARD", path: "/dashboard" },
-            { name: "CHECK SCORE", path: "#check-score" },
+            { name: "CHECK SCORE", path: "/check-score" },
             { name: "ABOUT US", path: "#about" },
             { name: "APP", path: "#app" }
           ].map((item, index) => (
@@ -109,12 +109,27 @@ const Navigation = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="flex items-center space-x-4"
         >
-          <Button variant="outline" className="glass-effect border-white/30 text-white hover:bg-white/10 hover:border-white/50 nike-button font-nike-helvetica font-bold tracking-wide text-sm px-6 py-2">
-            GET STARTED
-          </Button>
+          <Link to="/login">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button variant="ghost" className="text-white hover:bg-white/10 nike-button font-cred-body font-medium tracking-wide text-sm px-4 py-2">
+                LOGIN
+              </Button>
+            </motion.div>
+          </Link>
+
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button variant="outline" className="glass-effect border-white/30 text-white hover:bg-white/10 hover:border-white/50 nike-button font-nike-helvetica font-bold tracking-wide text-sm px-6 py-2">
+              GET STARTED
+            </Button>
+          </motion.div>
         </motion.div>
       </motion.div>
     </motion.nav>
