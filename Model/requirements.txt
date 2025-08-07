@@ -1,0 +1,50 @@
+# Credit Score Prediction Model Requirements
+
+# Core Data Science Libraries
+pandas==2.1.4
+numpy==1.24.3
+scikit-learn==1.3.2
+
+# Visualization Libraries
+matplotlib==3.7.2
+seaborn==0.12.2
+plotly==5.17.0
+
+# Machine Learning & Advanced Analytics
+xgboost==2.0.2
+lightgbm==4.1.0
+catboost==1.2.2
+optuna==3.4.0
+shap==0.43.0
+
+# Deep Learning for Tabular Data (Optional)
+# pytorch-tabnet==4.1.0
+# tensorflow==2.15.0
+
+# Data Processing & Utilities
+scipy==1.11.4
+imbalanced-learn==0.11.0
+category_encoders==2.6.2
+
+# Jupyter & Development
+jupyter==1.0.0
+ipywidgets==8.1.1
+tqdm==4.66.1
+
+# Model Deployment & API
+flask==3.0.0
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# Data Validation & Quality
+pandas-profiling==3.6.6
+great-expectations==0.18.8
+
+# Compliance & Security
+cryptography==41.0.8
+hashlib-compat==1.0.1
+
+# Utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
+joblib==1.3.2
