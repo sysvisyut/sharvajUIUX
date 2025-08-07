@@ -255,16 +255,16 @@ class ModelUtilities:
         """
         if weights is None:
             weights = {
-                'rent_on_time_rate': 0.20,
-                'loan_repayment_consistency': 0.15,
-                'savings_ratio': 0.15,
-                'digital_payment_activity': 0.10,
-                'monthly_cashflow': 0.10,
-                'avg_utility_payment_delay': 0.10,
-                'education_level': 0.08,
-                'employment_type': 0.07,
-                'region_type': 0.03,
-                'has_existing_loans': 0.02
+                'rent_on_time_rate': 0.25,  # Primary indicator of payment history
+                'loan_repayment_consistency': 0.20,  # Key for repayment behavior
+                'savings_ratio': 0.10,  # Reflects financial discipline
+                'digital_payment_activity': 0.08,  # Secondary financial behavior
+                'monthly_cashflow': 0.15,  # Critical for repayment capacity
+                'avg_utility_payment_delay': 0.08,  # Specific payment history
+                'education_level': 0.05,  # Contextual personal factor
+                'employment_type': 0.05,  # Contextual stability factor
+                'region_type': 0.02,  # Minimal direct impact
+                'has_existing_loans': 0.02  # Minor risk indicator
             }
         
         score = 300  # Base score
@@ -301,6 +301,7 @@ class ModelUtilities:
         final_score = score + int(weighted_score * 550)  # Scale to 300-850 range
         
         return min(max(final_score, 300), 850)  # Ensure within valid range
+
     
     @staticmethod
     def create_credit_score_bands(scores: np.ndarray) -> np.ndarray:

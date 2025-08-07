@@ -35,7 +35,7 @@ Our model uses alternative data sources to provide more inclusive credit scoring
 Model/
 ├── src/
 │   ├── data_preprocessing.py    # Data cleaning and preprocessing
-│   ├── data_visualization.py    # EDA and visualization functions
+│   ├── data_visualization.py    # Streamlined model evaluation plots
 │   ├── model_training.py        # Model training scripts (to be added)
 │   ├── model_evaluation.py      # Model evaluation utilities (to be added)
 │   └── utils.py                 # Utility functions and compliance tools
@@ -75,17 +75,23 @@ X_train, X_test, y_train, y_test, report = preprocessor.preprocess_pipeline(
 ### Data Visualization
 
 ```python
-from src.data_visualization import CreditScoreVisualizer
-
-# Initialize visualizer
-visualizer = CreditScoreVisualizer()
+from src.data_visualization import plot_feature_relationships, evaluate_model_performance
 
 # Load your data
 import pandas as pd
 df = pd.read_csv("path/to/your/data.csv")
 
-# Run comprehensive visualization
-visualizer.visualize_all(df, target_col="credit_score", interactive=True)
+# Plot feature relationships with target
+plot_feature_relationships(df, target_col="credit_score")
+
+# Evaluate trained model performance
+evaluate_model_performance(
+    model=trained_model,
+    X_test=X_test,
+    y_test=y_test,
+    train_history=training_history,  # optional
+    model_type='regression'
+)
 ```
 
 ### Utility Functions
