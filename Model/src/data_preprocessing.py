@@ -28,14 +28,13 @@ class CreditScoreDataPreprocessor:
         self.label_encoders = {}
         self.feature_names = []
         self.numerical_features = [
-            'age', 'employment_stability_months', 'monthly_income', 'monthly_rent', 
-            'monthly_cashflow', 'rent_payment_consistency', 'utility_payment_consistency',
-            'phone_payment_consistency', 'insurance_payment_consistency', 'num_subscriptions',
-            'subscription_payment_consistency', 'minimum_bank_balance', 'monthly_savings',
-            'savings_goal_completion_rate', 'p2p_monthly_volume', 'risky_p2p_ratio', 'monthly_overdrafts'
+            'age', 'monthly_income', 'monthly_housing_cost', 'num_dependents', 
+            'years_current_job', 'num_credit_cards', 'student_loan_payment', 
+            'car_loan_payment', 'bank_balance', 'monthly_savings', 
+            'recent_credit_inquiries', 'late_payments_12m', 'years_credit_history'
         ]
         self.categorical_features = ['state', 'education_level', 'employment_type', 'loan_approval']
-        self.boolean_features = []  # No boolean features in new dataset
+        self.boolean_features = ['has_student_loan', 'has_car_loan', 'has_mortgage', 'bankruptcy_history']
         
     def load_data(self, csv_path: str) -> pd.DataFrame:
         """
@@ -52,14 +51,13 @@ class CreditScoreDataPreprocessor:
             logger.info(f"Data loaded successfully. Shape: {df.shape}")
             logger.info(f"Columns found: {list(df.columns)}")
             
-            # Validate expected columns for credit invisibility dataset
+            # Validate expected columns for user-providable dataset
             expected_columns = [
-                'age', 'state', 'education_level', 'employment_type', 'employment_stability_months',
-                'monthly_income', 'monthly_rent', 'monthly_cashflow', 'rent_payment_consistency',
-                'utility_payment_consistency', 'phone_payment_consistency', 'insurance_payment_consistency',
-                'num_subscriptions', 'subscription_payment_consistency', 'minimum_bank_balance',
-                'monthly_savings', 'savings_goal_completion_rate', 'p2p_monthly_volume', 'risky_p2p_ratio',
-                'monthly_overdrafts'
+                'age', 'state', 'education_level', 'employment_type', 'monthly_income',
+                'monthly_housing_cost', 'num_dependents', 'years_current_job', 'num_credit_cards',
+                'has_student_loan', 'student_loan_payment', 'has_car_loan', 'car_loan_payment',
+                'has_mortgage', 'bank_balance', 'monthly_savings', 'recent_credit_inquiries',
+                'late_payments_12m', 'bankruptcy_history', 'years_credit_history'
             ]
             
             missing_columns = set(expected_columns) - set(df.columns)
@@ -213,7 +211,7 @@ class CreditScoreDataPreprocessor:
     
     def create_feature_interactions(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Create meaningful feature interactions for credit invisibility data
+        Create meaningful feature interactions for user-providable financial data
         
         Args:
             df (pd.DataFrame): Input dataframe
@@ -223,49 +221,51 @@ class CreditScoreDataPreprocessor:
         """
         df_copy = df.copy()
         
-        # Payment reliability score - average of all payment consistencies
-        payment_cols = ['rent_payment_consistency', 'utility_payment_consistency', 
-                       'phone_payment_consistency', 'insurance_payment_consistency',
-                       'subscription_payment_consistency']
-        available_payment_cols = [col for col in payment_cols if col in df_copy.columns]
-        if available_payment_cols:
-            df_copy['overall_payment_reliability'] = df_copy[available_payment_cols].mean(axis=1)
+        # Debt-to-income ratio (fundamental financial health metric)
+        if 'monthly_income' in df_copy.columns and 'monthly_housing_cost' in df_copy.columns:
+            total_monthly_debt = (df_copy['monthly_housing_cost'] + 
+                                df_copy.get('student_loan_payment', 0) + 
+                                df_copy.get('car_loan_payment', 0))
+            df_copy['debt_to_income_ratio'] = total_monthly_debt / (df_copy['monthly_income'] + 1)
         
-        # Income to rent ratio (housing affordability)
-        if 'monthly_income' in df_copy.columns and 'monthly_rent' in df_copy.columns:
-            df_copy['income_to_rent_ratio'] = df_copy['monthly_income'] / (df_copy['monthly_rent'] + 1)  # +1 to avoid division by zero
+        # Available monthly income after fixed expenses
+        if 'monthly_income' in df_copy.columns and 'monthly_housing_cost' in df_copy.columns:
+            df_copy['available_income'] = (df_copy['monthly_income'] - 
+                                         df_copy['monthly_housing_cost'] - 
+                                         df_copy.get('student_loan_payment', 0) - 
+                                         df_copy.get('car_loan_payment', 0))
         
-        # Financial cushion (income minus essential expenses)
-        if 'monthly_income' in df_copy.columns and 'monthly_rent' in df_copy.columns:
-            estimated_essentials = df_copy['monthly_rent'] + 300  # rent + estimated utilities/food
-            df_copy['financial_cushion'] = (df_copy['monthly_income'] - estimated_essentials) / df_copy['monthly_income']
-            df_copy['financial_cushion'] = df_copy['financial_cushion'].clip(lower=-1, upper=1)
+        # Savings rate (how much of available income is saved)
+        if 'monthly_savings' in df_copy.columns and 'available_income' in df_copy.columns:
+            df_copy['savings_rate'] = df_copy['monthly_savings'] / (df_copy['available_income'] + 1)
         
-        # Savings efficiency (how well they save relative to available income)
-        if 'monthly_savings' in df_copy.columns and 'monthly_cashflow' in df_copy.columns:
-            df_copy['savings_efficiency'] = df_copy['monthly_savings'] / (df_copy['monthly_cashflow'] + 1)
-            df_copy['savings_efficiency'] = df_copy['savings_efficiency'].clip(lower=0, upper=2)
+        # Financial stability score (combination of job tenure and savings)
+        if 'years_current_job' in df_copy.columns and 'bank_balance' in df_copy.columns:
+            # Reduce the weight of years_current_job to avoid multicollinearity
+            df_copy['financial_stability'] = (np.sqrt(df_copy['years_current_job'] + 1) * 100 + 
+                                            np.log(df_copy['bank_balance'] + 1)) / 10
         
-        # Risk behavior score (combines risky P2P and overdrafts)
-        risk_factors = []
-        if 'risky_p2p_ratio' in df_copy.columns:
-            risk_factors.append(df_copy['risky_p2p_ratio'])
-        if 'monthly_overdrafts' in df_copy.columns:
-            # Normalize overdrafts to 0-1 scale
-            max_overdrafts = df_copy['monthly_overdrafts'].max()
-            if max_overdrafts > 0:
-                risk_factors.append(df_copy['monthly_overdrafts'] / max_overdrafts)
+        # Credit utilization proxy (cards vs income)
+        if 'num_credit_cards' in df_copy.columns and 'monthly_income' in df_copy.columns:
+            df_copy['credit_capacity'] = df_copy['monthly_income'] / (df_copy['num_credit_cards'] + 1)
         
-        if risk_factors:
-            df_copy['risk_behavior_score'] = sum(risk_factors) / len(risk_factors)
+        # Risk factors combination (inquiries and late payments)
+        if 'recent_credit_inquiries' in df_copy.columns and 'late_payments_12m' in df_copy.columns:
+            df_copy['credit_risk_score'] = (df_copy['recent_credit_inquiries'] + 
+                                          df_copy['late_payments_12m'] * 2)
         
-        # Employment stability factor
-        if 'employment_stability_months' in df_copy.columns and 'age' in df_copy.columns:
-            # Normalize by age to get relative stability
-            df_copy['employment_stability_ratio'] = df_copy['employment_stability_months'] / (df_copy['age'] * 12 + 1)
-            df_copy['employment_stability_ratio'] = df_copy['employment_stability_ratio'].clip(upper=1)
+        # Age-adjusted credit history (how long they've had credit relative to age)
+        if 'years_credit_history' in df_copy.columns and 'age' in df_copy.columns:
+            df_copy['credit_history_ratio'] = df_copy['years_credit_history'] / df_copy['age']
         
-        logger.info("Feature interactions created for credit invisibility data")
+        # Debt burden indicator (total debt payments vs income)
+        debt_columns = ['student_loan_payment', 'car_loan_payment']
+        existing_debt_cols = [col for col in debt_columns if col in df_copy.columns]
+        if existing_debt_cols and 'monthly_income' in df_copy.columns:
+            total_debt_payments = df_copy[existing_debt_cols].sum(axis=1)
+            df_copy['debt_burden'] = total_debt_payments / (df_copy['monthly_income'] + 1)
+        
+        logger.info("Feature interactions created for user-providable financial data")
         return df_copy
     
     def encode_categorical_features(self, df: pd.DataFrame, fit: bool = True) -> pd.DataFrame:
@@ -281,9 +281,9 @@ class CreditScoreDataPreprocessor:
         """
         df_copy = df.copy()
         
-        # Define ordinal mappings for credit invisibility data
+        # Define ordinal mappings for user-providable dataset
         ordinal_mappings = {
-            'education_level': {'high_school': 0, 'some_college': 1, 'bachelors': 2, 'graduate': 3}
+            'education_level': {'high_school': 0, 'some_college': 1, 'bachelors': 2, 'masters': 3, 'doctorate': 4}
         }
         
         # Apply ordinal encoding for ordinal features

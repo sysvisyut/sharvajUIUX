@@ -80,6 +80,15 @@ class BaselineLinearModel:
         if not self.is_fitted:
             raise ValueError("Model must be trained before making predictions!")
         
+        # Check for NaN values before prediction
+        if hasattr(X, 'isnull'):
+            nan_count = X.isnull().sum().sum()
+            if nan_count > 0:
+                print(f"⚠️ Warning: Found {nan_count} NaN values in prediction data")
+                # Fill NaN values with median for numerical columns
+                X = X.fillna(X.median(numeric_only=True))
+                print("✅ NaN values filled with column medians")
+        
         return self.model.predict(X)
     
     def evaluate(self, X_test, y_test):
@@ -97,6 +106,20 @@ class BaselineLinearModel:
             raise ValueError("Model must be trained before evaluation!")
         
         print("📊 Evaluating model on test data...")
+        
+        # Check for NaN values before prediction
+        if hasattr(X_test, 'isnull'):
+            nan_count = X_test.isnull().sum().sum()
+            if nan_count > 0:
+                print(f"⚠️ Warning: Found {nan_count} NaN values in test data")
+                print("NaN values by column:")
+                nan_cols = X_test.isnull().sum()
+                for col, count in nan_cols[nan_cols > 0].items():
+                    print(f"   • {col}: {count}")
+                
+                # Fill NaN values with median for numerical columns
+                X_test = X_test.fillna(X_test.median(numeric_only=True))
+                print("✅ NaN values filled with column medians")
         
         # Make predictions
         y_test_pred = self.predict(X_test)
@@ -285,8 +308,7 @@ def train_baseline_model():
     preprocessor = CreditScoreDataPreprocessor()
     
     # Path to dataset
-    data_path = r"C:\FT2\CodeZilla_FT2\Model\data\financial_dataset.csv"
-    
+    data_path = r"C:\FT2\CodeZilla_FT2\Model\data\financial_dataset.csv"    
     try:
         print(f"📂 Loading and preprocessing data from: {data_path}")
         
@@ -305,6 +327,19 @@ def train_baseline_model():
         print(f"   • Training set: {X_train.shape}")
         print(f"   • Validation set: {X_val.shape}")
         print(f"   • Test set: {X_test.shape}")
+        
+        # Check for NaN values in preprocessed data
+        print("\n🔍 Checking for NaN values after preprocessing:")
+        print(f"   • Training set NaNs: {X_train.isnull().sum().sum()}")
+        print(f"   • Validation set NaNs: {X_val.isnull().sum().sum()}")
+        print(f"   • Test set NaNs: {X_test.isnull().sum().sum()}")
+        
+        # If there are NaN values, show which columns
+        if X_test.isnull().sum().sum() > 0:
+            print("   • NaN columns in test set:")
+            nan_cols = X_test.isnull().sum()
+            for col, count in nan_cols[nan_cols > 0].items():
+                print(f"     - {col}: {count}")
         
         # Initialize and train baseline model
         baseline_model = BaselineLinearModel()
@@ -330,11 +365,14 @@ def train_baseline_model():
         # Generate comprehensive model evaluation visualizations
         print("\n🎯 Generating Model Evaluation Visualizations...")
         try:
+            # Clean test data before passing to visualization
+            X_test_clean = X_test.fillna(X_test.median(numeric_only=True))
+            
             evaluate_model_performance(
                 model=baseline_model.model,
-                X_test=X_test,
+                X_test=X_test_clean,
                 y_test=y_test,
-                feature_names=list(X_test.columns) if hasattr(X_test, 'columns') else None,
+                feature_names=list(X_test_clean.columns) if hasattr(X_test_clean, 'columns') else None,
                 model_type='regression'
             )
         except Exception as e:
