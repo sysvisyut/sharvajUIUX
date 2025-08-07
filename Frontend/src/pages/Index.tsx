@@ -122,7 +122,7 @@ const Index = () => {
             >
               Join thousands already using CRED NOVA for fair and transparent credit scoring
             </p>
-            <Link to="/dashboard">
+            <Link to="/check-score">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
