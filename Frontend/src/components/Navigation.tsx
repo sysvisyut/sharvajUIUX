@@ -22,9 +22,13 @@ const Navigation = () => {
 
   return (
     <motion.nav
-      style={{ backgroundColor }}
+      style={{ 
+        backgroundColor,
+        backdropFilter: 'blur(25px)',
+        WebkitBackdropFilter: 'blur(25px)'
+      }}
       className={`fixed top-0 left-0 right-0 z-50 p-6 transition-all duration-300 ${
-        isScrolled ? 'backdrop-blur-md border-b border-white/10' : ''
+        isScrolled ? 'border-b border-white/10' : ''
       }`}
     >
       <motion.div

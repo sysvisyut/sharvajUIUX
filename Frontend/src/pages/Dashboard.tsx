@@ -19,6 +19,7 @@ import {
   Shield,
   Zap
 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import CreditScoreCalculator from '@/components/CreditScoreCalculator';
 import Navigation from '@/components/Navigation';
 import OrbBackground from '@/components/ui/OrbBackground';
@@ -27,7 +28,6 @@ const Dashboard = () => {
   // Mock data - in real app this would come from API
   const creditScore = 712;
   const scoreDate = "December 15, 2024";
-  const dataCompleteness = 85;
   
   const scoreFactors = [
     { factor: "Rent Payment Consistency", impact: "positive", description: "12 months of on-time payments" },
@@ -75,30 +75,29 @@ const Dashboard = () => {
   const missingFields = ["Bank Account Verification", "Employment History", "Streaming Subscriptions"];
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-y-auto">
       <OrbBackground />
-      <div className="fixed inset-0 bg-gradient-to-br from-black/20 via-transparent to-black/30 pointer-events-none -z-5"></div>
       
       <Navigation />
       
-      <div className="pt-24 px-6 pb-12">
+      <div className="pt-20 px-4 pb-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="flex justify-between items-center mb-8"
+            className="flex justify-between items-center mb-4"
           >
             <div>
               <h1 
-                className="text-4xl font-cred-heading font-bold text-white mb-2"
+                className="text-3xl font-cred-heading font-bold text-white mb-2"
                 style={{ textShadow: '2px 2px 12px rgba(0, 0, 0, 0.8)' }}
               >
                 Your Credit Dashboard
               </h1>
               <p 
-                className="text-white/80 font-cred-body text-lg"
+                className="text-white/80 font-cred-body text-base"
                 style={{ textShadow: '1px 1px 6px rgba(0, 0, 0, 0.6)' }}
               >
                 Track your alternative credit journey
@@ -118,24 +117,25 @@ const Dashboard = () => {
             </motion.div>
           </motion.div>
 
-          {/* Main Grid */}
-          <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Grid - No scroll, everything fits */}
+          <div className="grid lg:grid-cols-4 gap-4 h-[calc(100vh-140px)]">
             {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-3 space-y-4">
               
-              {/* Credit Score Summary */}
+              {/* Combined Credit Score, Line Graph & Insights */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
+                className="h-full"
               >
-                <Card className="glass-effect p-8 border-white/10 glow-effect">
-                  <div className="flex items-center justify-between mb-6">
+                <Card className="glass-effect p-4 border-white/10 glow-effect h-full">
+                  <div className="flex items-center justify-between mb-3">
                     <h2 
-                      className="text-2xl font-cred-heading font-bold text-white"
+                      className="text-xl font-cred-heading font-bold text-white"
                       style={{ textShadow: '1px 1px 8px rgba(0, 0, 0, 0.8)' }}
                     >
-                      Latest Credit Score
+                      Credit Dashboard Overview
                     </h2>
                     <span 
                       className="text-white/60 font-cred-body text-sm"
@@ -145,515 +145,192 @@ const Dashboard = () => {
                     </span>
                   </div>
                   
-                  <div className="grid md:grid-cols-2 gap-8 items-center">
-                    <div className="flex flex-col items-center">
-                      <CreditScoreCalculator targetScore={creditScore} className="scale-75" />
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.8 }}
-                        className="mt-4 text-center"
-                      >
-                        <div className="flex items-center justify-center gap-2 mb-2">
-                          <span
-                            className="text-2xl font-cred-heading font-bold text-white"
-                            style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.8)' }}
-                          >
-                            {creditScore}
-                          </span>
-                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-400/30">
-                            Good
-                          </Badge>
-                        </div>
-                        <p
-                          className="text-white/70 font-cred-body text-sm"
-                          style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
-                        >
-                          Alternative Credit Score
-                        </p>
-                      </motion.div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3
-                          className="text-lg font-cred-heading font-semibold text-white"
-                          style={{ textShadow: '1px 1px 6px rgba(0, 0, 0, 0.8)' }}
-                        >
-                          Score Factors
-                        </h3>
-                        <motion.div
-                          animate={{ rotate: [0, 10, -10, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                        >
-                          <Target className="w-5 h-5 text-cyan-400" />
-                        </motion.div>
-                      </div>
-                      {scoreFactors.map((factor, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
-                          whileHover={{ scale: 1.02, x: 5 }}
-                          className={`flex items-start gap-3 p-4 rounded-lg border transition-all duration-300 cursor-pointer ${
-                            factor.impact === 'positive'
-                              ? 'bg-emerald-500/10 border-emerald-400/30 hover:bg-emerald-500/20'
-                              : factor.impact === 'negative'
-                              ? 'bg-red-500/10 border-red-400/30 hover:bg-red-500/20'
-                              : 'bg-blue-500/10 border-blue-400/30 hover:bg-blue-500/20'
-                          }`}
-                        >
-                          {factor.impact === 'positive' ? (
-                            <motion.div
-                              animate={{ scale: [1, 1.2, 1] }}
-                              transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
-                            >
-                              <CheckCircle className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                            </motion.div>
-                          ) : factor.impact === 'negative' ? (
-                            <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                          ) : (
-                            <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                          )}
-                          <div className="flex-1">
-                            <p
-                              className="text-white font-cred-body font-medium text-sm"
-                              style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
-                            >
-                              {factor.factor}
-                            </p>
-                            <p
-                              className="text-white/70 font-cred-body text-xs mt-1"
-                              style={{ textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)' }}
-                            >
-                              {factor.description}
-                            </p>
-                          </div>
-                          {factor.impact === 'positive' && (
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 0.5 + index * 0.1 }}
-                            >
-                              <span className="text-emerald-400 text-xs font-semibold">+15</span>
-                            </motion.div>
-                          )}
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-
-              {/* Score Trend Chart */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <Card className="glass-effect p-6 border-white/10 glow-effect">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3
-                      className="text-xl font-cred-heading font-bold text-white"
-                      style={{ textShadow: '1px 1px 8px rgba(0, 0, 0, 0.8)' }}
+                  {/* Top Section - Credit Score centered */}
+                  <div className="flex flex-col items-center justify-center mb-6">
+                    <CreditScoreCalculator targetScore={creditScore} className="scale-75" />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.8 }}
+                      className="mt-4 text-center"
                     >
-                      📈 Score Trend
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-emerald-400" />
-                      <span
-                        className="text-emerald-400 font-cred-body text-sm font-semibold"
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <span
+                          className="text-2xl font-cred-heading font-bold text-white"
+                          style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.8)' }}
+                        >
+                          {creditScore}
+                        </span>
+                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-400/30">
+                          Good
+                        </Badge>
+                      </div>
+                      <p
+                        className="text-white/70 font-cred-body text-sm"
                         style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
                       >
-                        +34 points
-                      </span>
-                    </div>
+                        Alternative Credit Score
+                      </p>
+                    </motion.div>
                   </div>
-                  <div className="flex items-end justify-between h-40 gap-6 mb-4">
-                    {scoreHistory.map((item, index) => (
-                      <motion.div
-                        key={index}
-                        className="flex-1 flex flex-col items-center"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 + index * 0.2 }}
-                      >
-                        <motion.div
-                          initial={{ height: 0 }}
-                          animate={{ height: `${(item.score / 850) * 120}px` }}
-                          transition={{ duration: 1, delay: 0.5 + index * 0.2, ease: "easeOut" }}
-                          className="w-full bg-gradient-to-t from-emerald-500 via-emerald-400 to-cyan-400 rounded-t-lg relative min-h-[30px] flex items-end justify-center shadow-lg"
-                          style={{
-                            boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)'
-                          }}
-                        >
-                          <motion.span
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.4, delay: 1 + index * 0.2 }}
-                            className="text-white font-cred-body font-bold text-sm mb-2 bg-black/30 px-2 py-1 rounded backdrop-blur-sm"
-                            style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.8)' }}
-                          >
-                            {item.score}
-                          </motion.span>
-                        </motion.div>
-                        <span
-                          className="text-white/60 font-cred-body text-xs text-center mt-3"
-                          style={{ textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)' }}
-                        >
-                          {item.date}
+
+                  {/* Score Trend Section - Full width under the score */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-cred-heading font-bold text-white">
+                        📈 Score Trend
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-emerald-400" />
+                        <span className="text-emerald-400 font-cred-body text-sm font-semibold">
+                          +34 points
                         </span>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Trend Line Visualization */}
-                  <div className="relative h-2 bg-black/20 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 2, delay: 1.5 }}
-                      className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full"
-                      style={{
-                        boxShadow: '0 0 10px rgba(16, 185, 129, 0.5)'
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex justify-between items-center mt-4 text-xs">
-                    <span
-                      className="text-white/60 font-cred-body"
-                      style={{ textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)' }}
-                    >
-                      3-month progress
-                    </span>
-                    <span
-                      className="text-emerald-400 font-cred-body font-semibold"
-                      style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
-                    >
-                      Excellent improvement!
-                    </span>
-                  </div>
-                </Card>
-              </motion.div>
-
-              {/* Personalized Insights */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                <Card className="glass-effect p-6 border-white/10">
-                  <h3 
-                    className="text-xl font-cred-heading font-bold text-white mb-6"
-                    style={{ textShadow: '1px 1px 8px rgba(0, 0, 0, 0.8)' }}
-                  >
-                    💡 Personalized Insights
-                  </h3>
-                  <div className="space-y-4">
-                    {insights.map((insight, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20, rotateX: -90 }}
-                        animate={{ opacity: 1, x: 0, rotateX: 0 }}
-                        transition={{
-                          duration: 0.6,
-                          delay: 0.4 + index * 0.15,
-                          type: "spring",
-                          stiffness: 100
-                        }}
-                        whileHover={{
-                          scale: 1.02,
-                          y: -2,
-                          boxShadow: insight.type === 'positive'
-                            ? "0 10px 30px rgba(16, 185, 129, 0.2)"
-                            : insight.type === 'warning'
-                            ? "0 10px 30px rgba(251, 146, 60, 0.2)"
-                            : "0 10px 30px rgba(59, 130, 246, 0.2)"
-                        }}
-                        className={`p-5 rounded-xl border cursor-pointer transition-all duration-300 ${
-                          insight.type === 'positive'
-                            ? 'bg-emerald-500/15 border-emerald-400/40 hover:border-emerald-400/60'
-                            : insight.type === 'warning'
-                            ? 'bg-orange-500/15 border-orange-400/40 hover:border-orange-400/60'
-                            : 'bg-blue-500/15 border-blue-400/40 hover:border-blue-400/60'
-                        }`}
-                        style={{
-                          backdropFilter: 'blur(10px)'
-                        }}
-                      >
-                        <div className="flex items-start gap-3">
-                          <motion.div
-                            animate={{
-                              rotate: insight.type === 'positive' ? [0, 360] : [0, 10, -10, 0],
-                              scale: [1, 1.1, 1]
+                      </div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-4 h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={scoreHistory}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.15)" />
+                          <XAxis 
+                            dataKey="date" 
+                            stroke="rgba(255,255,255,0.7)"
+                            fontSize={12}
+                            fontFamily="var(--font-cred-body)"
+                          />
+                          <YAxis 
+                            stroke="rgba(255,255,255,0.7)"
+                            fontSize={12}
+                            fontFamily="var(--font-cred-body)"
+                            domain={['dataMin - 20', 'dataMax + 20']}
+                            width={40}
+                          />
+                          <Tooltip 
+                            contentStyle={{
+                              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              borderRadius: '8px',
+                              backdropFilter: 'blur(15px)',
+                              color: 'white',
+                              fontSize: '12px'
                             }}
-                            transition={{
-                              duration: insight.type === 'positive' ? 3 : 2,
-                              repeat: Infinity,
-                              repeatDelay: 3 + index
+                            labelStyle={{ color: 'white', fontSize: '11px' }}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="score" 
+                            stroke="url(#scoreGradient)" 
+                            strokeWidth={3}
+                            dot={{ 
+                              fill: '#10b981', 
+                              strokeWidth: 2, 
+                              r: 5,
+                              stroke: '#065f46'
                             }}
-                          >
-                            {insight.type === 'positive' ? (
-                              <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-                            ) : insight.type === 'warning' ? (
-                              <AlertCircle className="w-6 h-6 text-orange-400 flex-shrink-0" />
-                            ) : (
-                              <Zap className="w-6 h-6 text-blue-400 flex-shrink-0" />
-                            )}
-                          </motion.div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4
-                                className="text-white font-cred-body font-bold text-sm"
-                                style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
-                              >
-                                {insight.title}
-                              </h4>
-                              {insight.type === 'positive' && (
-                                <motion.div
-                                  initial={{ scale: 0, rotate: -180 }}
-                                  animate={{ scale: 1, rotate: 0 }}
-                                  transition={{ delay: 0.8 + index * 0.2, type: "spring" }}
-                                >
-                                  <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 text-xs">
-                                    +17 pts
-                                  </Badge>
-                                </motion.div>
-                              )}
-                            </div>
-                            <p
-                              className="text-white/85 font-cred-body text-sm leading-relaxed"
-                              style={{ textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)' }}
-                            >
-                              {insight.message}
-                            </p>
-                            {insight.type === 'tip' && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1 + index * 0.2 }}
-                                className="mt-3"
-                              >
-                                <Button
-                                  size="sm"
-                                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-400/30 text-xs"
-                                >
-                                  Take Action
-                                </Button>
-                              </motion.div>
-                            )}
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                            activeDot={{ 
+                              r: 8, 
+                              fill: '#06d6a0',
+                              stroke: '#065f46',
+                              strokeWidth: 3
+                            }}
+                          />
+                          <defs>
+                            <linearGradient id="scoreGradient" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#10b981" />
+                              <stop offset="50%" stopColor="#06d6a0" />
+                              <stop offset="100%" stopColor="#22d3ee" />
+                            </linearGradient>
+                          </defs>
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
                 </Card>
               </motion.div>
             </div>
 
-            {/* Right Column - Sidebar */}
-            <div className="space-y-6">
+            {/* Right Sidebar - Condensed */}
+            <div className="lg:col-span-1 space-y-4">
               
-              {/* Data Completeness */}
+              {/* Gamification Badges - Compact */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <Card className="glass-effect p-6 border-white/10">
+                <Card className="glass-effect p-4 border-white/10">
                   <h3 
-                    className="text-lg font-cred-heading font-bold text-white mb-4"
+                    className="text-base font-cred-heading font-bold text-white mb-3"
                     style={{ textShadow: '1px 1px 8px rgba(0, 0, 0, 0.8)' }}
                   >
-                    📊 Profile Completeness
+                    🏅 Badges
                   </h3>
-                  <div className="text-center mb-4">
-                    <div className="relative w-24 h-24 mx-auto mb-4">
-                      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="40"
-                          fill="none"
-                          stroke="#1a1a1a"
-                          strokeWidth="8"
-                        />
-                        <motion.circle
-                          cx="50"
-                          cy="50"
-                          r="40"
-                          fill="none"
-                          stroke="url(#completeness-gradient)"
-                          strokeWidth="8"
-                          strokeLinecap="round"
-                          strokeDasharray={`${2 * Math.PI * 40}`}
-                          initial={{ strokeDashoffset: 2 * Math.PI * 40 }}
-                          animate={{ strokeDashoffset: 2 * Math.PI * 40 * (1 - dataCompleteness / 100) }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                        />
-                        <defs>
-                          <linearGradient id="completeness-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#10B981" />
-                            <stop offset="100%" stopColor="#06D6A0" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span 
-                          className="text-2xl font-cred-heading font-bold text-white"
-                          style={{ textShadow: '1px 1px 6px rgba(0, 0, 0, 0.8)' }}
-                        >
-                          {dataCompleteness}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
                   <div className="space-y-2">
-                    <p 
-                      className="text-white/80 font-cred-body text-sm mb-3"
-                      style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
-                    >
-                      Missing fields:
-                    </p>
-                    {missingFields.map((field, index) => (
-                      <div key={index} className="flex items-center gap-2 text-orange-400 font-cred-body text-xs">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>{field}</span>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </motion.div>
-
-              {/* Gamification Badges */}
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                <Card className="glass-effect p-6 border-white/10">
-                  <h3 
-                    className="text-lg font-cred-heading font-bold text-white mb-4"
-                    style={{ textShadow: '1px 1px 8px rgba(0, 0, 0, 0.8)' }}
-                  >
-                    🏅 Your Badges
-                  </h3>
-                  <div className="space-y-3">
-                    {badges.map((badge, index) => (
+                    {badges.slice(0, 2).map((badge, index) => (
                       <motion.div
                         key={index}
-                        initial={{ opacity: 0, scale: 0.8, rotateY: -90 }}
-                        animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                        transition={{
-                          duration: 0.6,
-                          delay: 0.4 + index * 0.2,
-                          type: "spring",
-                          stiffness: 100
-                        }}
-                        whileHover={{
-                          scale: 1.05,
-                          rotateY: 5,
-                          boxShadow: "0 10px 30px rgba(168, 85, 247, 0.3)"
-                        }}
-                        className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-purple-500/15 via-pink-500/10 to-purple-500/15 border border-purple-400/30 cursor-pointer transition-all duration-300 hover:border-purple-400/50"
-                        style={{
-                          backdropFilter: 'blur(10px)',
-                          boxShadow: '0 4px 20px rgba(168, 85, 247, 0.1)'
-                        }}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
+                        whileHover={{ scale: 1.02 }}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-purple-500/10 via-pink-500/5 to-purple-500/10 border border-purple-400/20 cursor-pointer"
                       >
                         <motion.div
-                          animate={{
-                            rotate: [0, 10, -10, 0],
-                            scale: [1, 1.1, 1]
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            repeatDelay: 2 + index
-                          }}
-                          className="text-3xl filter drop-shadow-lg"
+                          animate={{ rotate: [0, 10, -10, 0] }}
+                          transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                          className="text-lg"
                         >
                           {badge.icon}
                         </motion.div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p
-                              className="text-white font-cred-body font-bold text-sm"
-                              style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
-                            >
-                              {badge.name}
-                            </p>
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={{ delay: 0.8 + index * 0.2 }}
-                            >
-                              <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                            </motion.div>
-                          </div>
+                        <div className="flex-1 min-w-0">
                           <p
-                            className="text-white/80 font-cred-body text-xs mb-1"
-                            style={{ textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)' }}
+                            className="text-white font-cred-body font-medium text-xs truncate"
+                            style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
                           >
-                            {badge.description}
+                            {badge.name}
                           </p>
                           <p
-                            className="text-purple-300 font-cred-body text-xs font-medium"
+                            className="text-purple-300 font-cred-body text-xs"
                             style={{ textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)' }}
                           >
-                            Earned {badge.earnedAt}
+                            +{5 + index * 2} pts
                           </p>
                         </div>
-                        <motion.div
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 1 + index * 0.2 }}
-                          className="flex flex-col items-center"
-                        >
-                          <Shield className="w-4 h-4 text-purple-400 mb-1" />
-                          <span className="text-purple-300 text-xs font-semibold">
-                            +{5 + index * 2}
-                          </span>
-                        </motion.div>
                       </motion.div>
                     ))}
                   </div>
                 </Card>
               </motion.div>
 
-              {/* Recent Activity */}
+              {/* Recent Activity - Compact */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
               >
-                <Card className="glass-effect p-6 border-white/10">
+                <Card className="glass-effect p-4 border-white/10">
                   <h3 
-                    className="text-lg font-cred-heading font-bold text-white mb-4"
+                    className="text-base font-cred-heading font-bold text-white mb-3"
                     style={{ textShadow: '1px 1px 8px rgba(0, 0, 0, 0.8)' }}
                   >
-                    🕒 Recent Activity
+                    🕒 Activity
                   </h3>
-                  <div className="space-y-3">
-                    {recentActivity.map((activity, index) => (
+                  <div className="space-y-2">
+                    {recentActivity.slice(0, 4).map((activity, index) => (
                       <motion.div
                         key={index}
-                        initial={{ opacity: 0, x: -20 }}
+                        initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
-                        className="flex items-start gap-3 p-3 rounded-lg bg-black/20 border border-white/10"
+                        transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
+                        className="flex items-start gap-2 p-2 rounded-lg bg-black/20 border border-white/5"
                       >
                         {activity.type === 'score' ? (
-                          <TrendingUp className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                          <TrendingUp className="w-3 h-3 text-emerald-400 mt-0.5 flex-shrink-0" />
                         ) : (
-                          <Award className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                          <Award className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />
                         )}
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <p 
-                            className="text-white font-cred-body text-sm"
+                            className="text-white font-cred-body text-xs leading-tight"
                             style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.6)' }}
                           >
                             {activity.message}
@@ -670,6 +347,58 @@ const Dashboard = () => {
                   </div>
                 </Card>
               </motion.div>
+
+              {/* Key Insights - Moved to Right Panel */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.35 }}
+              >
+                <Card className="glass-effect p-4 border-white/10">
+                  <h3 
+                    className="text-base font-cred-heading font-bold text-white mb-3"
+                    style={{ textShadow: '1px 1px 8px rgba(0, 0, 0, 0.8)' }}
+                  >
+                    💡 Key Insights
+                  </h3>
+                  <div className="space-y-3">
+                    {insights.slice(0, 2).map((insight, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
+                        whileHover={{ scale: 1.02 }}
+                        className={`p-3 rounded-lg border cursor-pointer transition-all duration-300 ${
+                          insight.type === 'positive'
+                            ? 'bg-emerald-500/10 border-emerald-400/30 hover:border-emerald-400/50'
+                            : insight.type === 'warning'
+                            ? 'bg-orange-500/10 border-orange-400/30 hover:border-orange-400/50'
+                            : 'bg-blue-500/10 border-blue-400/30 hover:border-blue-400/50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          {insight.type === 'positive' ? (
+                            <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                          ) : insight.type === 'warning' ? (
+                            <AlertCircle className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                          ) : (
+                            <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                          )}
+                          <div className="flex-1">
+                            <h4 className="text-white font-cred-body font-semibold text-xs mb-1">
+                              {insight.title}
+                            </h4>
+                            <p className="text-white/80 font-cred-body text-xs leading-relaxed">
+                              {insight.message}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </Card>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -679,7 +408,7 @@ const Dashboard = () => {
       <motion.div
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
-        transition={{ duration: 0.6, delay: 2 }}
+        transition={{ duration: 0.6, delay: 1.5 }}
         className="fixed bottom-8 right-8 z-50"
       >
         <motion.div
@@ -696,39 +425,16 @@ const Dashboard = () => {
             boxShadow: { duration: 2, repeat: Infinity },
             scale: { duration: 0.2 }
           }}
-          className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg"
+          className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg"
         >
           <motion.div
             animate={{ rotate: [0, 180, 360] }}
             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
           >
-            <Zap className="w-6 h-6 text-white" />
+            <Zap className="w-5 h-5 text-white" />
           </motion.div>
         </motion.div>
       </motion.div>
-
-      {/* Background Particles */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white/20 rounded-full"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-            }}
-            animate={{
-              y: [null, -100],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 3 + 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-      </div>
     </div>
   );
 };
