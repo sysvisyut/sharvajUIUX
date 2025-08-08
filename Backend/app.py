@@ -9,7 +9,7 @@ load_dotenv()
 app = create_app()
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 5001))
     debug = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
     
     print(f"🚀 Starting Credit Score Analysis API on port {port}")

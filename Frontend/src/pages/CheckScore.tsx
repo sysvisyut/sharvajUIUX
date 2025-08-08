@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
 import FloatingChatButton from '@/components/FloatingChatButton';
 import {
   User,
@@ -26,34 +26,34 @@ interface FormData {
   // Personal Information
   age: string;
   state: string;
-  educationLevel: string;
-  
+  education_level: string;
+
   // Employment & Income
-  employmentType: string;
-  monthlyIncome: string;
-  yearsAtCurrentJob: string;
-  
-  // Housing
-  monthlyHousingCost: string;
-  hasMortgage: string;
-  bankBalance: string;
-  monthlySavings: string;
-  
-  // Family & Dependents
-  numberOfDependents: string;
-  
+  employment_type: string;
+  monthly_income: string;
+  years_current_job: string;
+
+  // Housing & Financial
+  monthly_housing_cost: string;
+  has_mortgage: string;
+  bank_balance: string;
+  monthly_savings: string;
+
+  // Family
+  num_dependents: string;
+
   // Credit & Loans
-  numberOfCreditCards: string;
-  hasStudentLoan: string;
-  studentLoanPayment: string;
-  hasCarLoan: string;
-  carLoanPayment: string;
-  
-  // Credit Behavior
-  recentCreditInquiries: string;
-  latePayments: string;
-  bankruptcyHistory: string;
-  yearsOfCreditHistory: string;
+  num_credit_cards: string;
+  has_student_loan: string;
+  student_loan_payment: string;
+  has_car_loan: string;
+  car_loan_payment: string;
+
+  // Credit History
+  recent_credit_inquiries: string;
+  late_payments_12m: string;
+  bankruptcy_history: string;
+  years_credit_history: string;
 }
 
 const CheckScore = () => {
@@ -61,24 +61,24 @@ const CheckScore = () => {
   const [formData, setFormData] = useState<FormData>({
     age: '',
     state: '',
-    educationLevel: '',
-    employmentType: '',
-    monthlyIncome: '',
-    yearsAtCurrentJob: '',
-    monthlyHousingCost: '',
-    hasMortgage: '',
-    bankBalance: '',
-    monthlySavings: '',
-    numberOfDependents: '',
-    numberOfCreditCards: '',
-    hasStudentLoan: '',
-    studentLoanPayment: '',
-    hasCarLoan: '',
-    carLoanPayment: '',
-    recentCreditInquiries: '',
-    latePayments: '',
-    bankruptcyHistory: '',
-    yearsOfCreditHistory: ''
+    education_level: '',
+    employment_type: '',
+    monthly_income: '',
+    years_current_job: '',
+    monthly_housing_cost: '',
+    has_mortgage: '',
+    bank_balance: '',
+    monthly_savings: '',
+    num_dependents: '',
+    num_credit_cards: '',
+    has_student_loan: '',
+    student_loan_payment: '',
+    has_car_loan: '',
+    car_loan_payment: '',
+    recent_credit_inquiries: '',
+    late_payments_12m: '',
+    bankruptcy_history: '',
+    years_credit_history: ''
   });
 
   const [currentSection, setCurrentSection] = useState(0);
@@ -98,50 +98,82 @@ const CheckScore = () => {
     {
       title: "Personal Information",
       icon: User,
-      fields: ['age', 'state', 'educationLevel']
+      fields: ['age', 'state', 'education_level']
     },
     {
       title: "Employment & Income",
       icon: Briefcase,
-      fields: ['employmentType', 'monthlyIncome', 'yearsAtCurrentJob']
+      fields: ['employment_type', 'monthly_income', 'years_current_job']
     },
     {
-      title: "Housing",
+      title: "Housing & Financial",
       icon: Home,
-      fields: ['monthlyHousingCost', 'hasMortgage', 'bankBalance', 'monthlySavings']
+      fields: ['monthly_housing_cost', 'has_mortgage', 'bank_balance', 'monthly_savings']
     },
     {
-      title: "Family & Dependents",
+      title: "Family",
       icon: Users,
-      fields: ['numberOfDependents']
+      fields: ['num_dependents']
     },
     {
       title: "Credit & Loans",
       icon: CreditCard,
-      fields: ['numberOfCreditCards', 'hasStudentLoan', 'studentLoanPayment', 'hasCarLoan', 'carLoanPayment']
+      fields: ['num_credit_cards', 'has_student_loan', 'student_loan_payment', 'has_car_loan', 'car_loan_payment']
     },
     {
-      title: "Credit Behavior",
+      title: "Credit History",
       icon: TrendingUp,
-      fields: ['recentCreditInquiries', 'latePayments', 'bankruptcyHistory', 'yearsOfCreditHistory']
+      fields: ['recent_credit_inquiries', 'late_payments_12m', 'bankruptcy_history', 'years_credit_history']
     }
   ];
 
   const stateOptions = [
-    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
-    "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
-    "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
-    "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", 
-    "Uttarakhand", "West Bengal", "Delhi"
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+    "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+    "VA", "WA", "WV", "WI", "WY", "DC"
   ];
 
   const educationOptions = [
-    "High School", "Diploma", "Bachelor's", "Master's", "PhD", "Professional Degree"
+    { value: "high_school", label: "High School" },
+    { value: "some_college", label: "Some College" },
+    { value: "bachelors", label: "Bachelor's Degree" },
+    { value: "masters", label: "Master's Degree" },
+    { value: "doctorate", label: "Doctorate/PhD" }
   ];
 
   const employmentOptions = [
-    "Salaried", "Self-employed", "Business Owner", "Freelancer", "Unemployed", "Student", "Retired"
+    { value: "full_time", label: "Full Time" },
+    { value: "part_time", label: "Part Time" },
+    { value: "self_employed", label: "Self Employed" },
+    { value: "unemployed", label: "Unemployed" },
+    { value: "retired", label: "Retired" },
+    { value: "student", label: "Student" }
   ];
+
+  // Field configurations with human-friendly labels and examples
+  const fieldConfig = {
+    age: { label: "Age", placeholder: "e.g., 56", example: "56", type: "number" },
+    state: { label: "State", placeholder: "Select your state", example: "TX", type: "select", options: stateOptions.map(s => ({ value: s, label: s })) },
+    education_level: { label: "Education Level", placeholder: "Select education level", example: "masters", type: "select", options: educationOptions },
+    employment_type: { label: "Employment Type", placeholder: "Select employment type", example: "full_time", type: "select", options: employmentOptions },
+    monthly_income: { label: "Monthly Income ($)", placeholder: "e.g., 4842", example: "4842", type: "number" },
+    monthly_housing_cost: { label: "Monthly Housing Cost ($)", placeholder: "e.g., 2096", example: "2096", type: "number" },
+    num_dependents: { label: "Number of Dependents", placeholder: "e.g., 2", example: "2", type: "number" },
+    years_current_job: { label: "Years at Current Job", placeholder: "e.g., 7", example: "7", type: "number" },
+    num_credit_cards: { label: "Number of Credit Cards", placeholder: "e.g., 2", example: "2", type: "number" },
+    has_student_loan: { label: "Have Student Loan?", placeholder: "Select", example: "Yes", type: "select", options: [{ value: "0", label: "No" }, { value: "1", label: "Yes" }] },
+    student_loan_payment: { label: "Monthly Student Loan Payment ($)", placeholder: "e.g., 324", example: "324", type: "number" },
+    has_car_loan: { label: "Have Car Loan?", placeholder: "Select", example: "Yes", type: "select", options: [{ value: "0", label: "No" }, { value: "1", label: "Yes" }] },
+    car_loan_payment: { label: "Monthly Car Loan Payment ($)", placeholder: "e.g., 209", example: "209", type: "number" },
+    has_mortgage: { label: "Have Mortgage?", placeholder: "Select", example: "No", type: "select", options: [{ value: "0", label: "No" }, { value: "1", label: "Yes" }] },
+    bank_balance: { label: "Current Bank Balance ($)", placeholder: "e.g., 1309", example: "1309", type: "number" },
+    monthly_savings: { label: "Monthly Savings ($)", placeholder: "e.g., 169", example: "169", type: "number" },
+    recent_credit_inquiries: { label: "Recent Credit Inquiries (last 6 months)", placeholder: "e.g., 2", example: "2", type: "number" },
+    late_payments_12m: { label: "Late Payments (last 12 months)", placeholder: "e.g., 1", example: "1", type: "number" },
+    bankruptcy_history: { label: "Bankruptcy History", placeholder: "Select", example: "No", type: "select", options: [{ value: "0", label: "No" }, { value: "1", label: "Yes" }] },
+    years_credit_history: { label: "Years of Credit History", placeholder: "e.g., 32", example: "32", type: "number" }
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -238,408 +270,60 @@ const CheckScore = () => {
 
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Personal Information Section */}
-                  {currentSection === 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6 }}
-                      className="space-y-6"
-                    >
-                      {/* Age */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          AGE
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.age}
-                          onChange={(e) => handleInputChange('age', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter your age"
-                          min="18"
-                          max="100"
-                        />
-                      </div>
+                  {/* Dynamic Form Sections */}
+                  <motion.div
+                    key={currentSection}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="space-y-6"
+                  >
+                    {sections[currentSection].fields.map((fieldName) => {
+                      const config = fieldConfig[fieldName as keyof typeof fieldConfig];
+                      if (!config) return null;
 
-                      {/* State */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          STATE
-                        </Label>
-                        <Select value={formData.state} onValueChange={(value) => handleInputChange('state', value)}>
-                          <SelectTrigger className="bg-black/20 border-white/20 text-white focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body">
-                            <SelectValue placeholder="Select your state" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/90 border-white/20 text-white">
-                            {stateOptions.map((state) => (
-                              <SelectItem key={state} value={state} className="focus:bg-white/10">
-                                {state}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Education Level */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          EDUCATION LEVEL
-                        </Label>
-                        <Select value={formData.educationLevel} onValueChange={(value) => handleInputChange('educationLevel', value)}>
-                          <SelectTrigger className="bg-black/20 border-white/20 text-white focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body">
-                            <SelectValue placeholder="Select your education level" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/90 border-white/20 text-white">
-                            {educationOptions.map((education) => (
-                              <SelectItem key={education} value={education} className="focus:bg-white/10">
-                                {education}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Employment & Income Section */}
-                  {currentSection === 1 && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6 }}
-                      className="space-y-6"
-                    >
-                      {/* Employment Type */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          EMPLOYMENT TYPE
-                        </Label>
-                        <Select value={formData.employmentType} onValueChange={(value) => handleInputChange('employmentType', value)}>
-                          <SelectTrigger className="bg-black/20 border-white/20 text-white focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body">
-                            <SelectValue placeholder="Select employment type" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black/90 border-white/20 text-white">
-                            {employmentOptions.map((employment) => (
-                              <SelectItem key={employment} value={employment} className="focus:bg-white/10">
-                                {employment}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Monthly Income */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          MONTHLY INCOME (₹)
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.monthlyIncome}
-                          onChange={(e) => handleInputChange('monthlyIncome', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter monthly income"
-                          min="0"
-                        />
-                      </div>
-
-                      {/* Years at Current Job */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          YEARS AT CURRENT JOB
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.yearsAtCurrentJob}
-                          onChange={(e) => handleInputChange('yearsAtCurrentJob', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter years at current job"
-                          min="0"
-                          step="0.5"
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Housing Section */}
-                  {currentSection === 2 && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6 }}
-                      className="space-y-6"
-                    >
-                      {/* Monthly Housing Cost */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          MONTHLY HOUSING COST (₹)
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.monthlyHousingCost}
-                          onChange={(e) => handleInputChange('monthlyHousingCost', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter monthly housing cost"
-                          min="0"
-                        />
-                      </div>
-
-                      {/* Has Mortgage */}
-                      <div className="space-y-3">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          HAS MORTGAGE?
-                        </Label>
-                        <RadioGroup
-                          value={formData.hasMortgage}
-                          onValueChange={(value) => handleInputChange('hasMortgage', value)}
-                          className="flex space-x-6"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="yes" id="mortgage-yes" className="border-white/40 text-neon-blue" />
-                            <Label htmlFor="mortgage-yes" className="text-white font-cred-body">Yes</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="no" id="mortgage-no" className="border-white/40 text-neon-blue" />
-                            <Label htmlFor="mortgage-no" className="text-white font-cred-body">No</Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-
-                      {/* Bank Balance */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          BANK BALANCE (₹)
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.bankBalance}
-                          onChange={(e) => handleInputChange('bankBalance', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter bank balance"
-                          min="0"
-                        />
-                      </div>
-
-                      {/* Monthly Savings */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          MONTHLY SAVINGS (₹)
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.monthlySavings}
-                          onChange={(e) => handleInputChange('monthlySavings', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter monthly savings"
-                          min="0"
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Family & Dependents Section */}
-                  {currentSection === 3 && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6 }}
-                      className="space-y-6"
-                    >
-                      {/* Number of Dependents */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          NUMBER OF DEPENDENTS
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.numberOfDependents}
-                          onChange={(e) => handleInputChange('numberOfDependents', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter number of dependents"
-                          min="0"
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Credit & Loans Section */}
-                  {currentSection === 4 && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6 }}
-                      className="space-y-6"
-                    >
-                      {/* Number of Credit Cards */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          NUMBER OF CREDIT CARDS
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.numberOfCreditCards}
-                          onChange={(e) => handleInputChange('numberOfCreditCards', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter number of credit cards"
-                          min="0"
-                        />
-                      </div>
-
-                      {/* Has Student Loan */}
-                      <div className="space-y-3">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          HAS STUDENT LOAN?
-                        </Label>
-                        <RadioGroup
-                          value={formData.hasStudentLoan}
-                          onValueChange={(value) => handleInputChange('hasStudentLoan', value)}
-                          className="flex space-x-6"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="yes" id="student-loan-yes" className="border-white/40 text-neon-blue" />
-                            <Label htmlFor="student-loan-yes" className="text-white font-cred-body">Yes</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="no" id="student-loan-no" className="border-white/40 text-neon-blue" />
-                            <Label htmlFor="student-loan-no" className="text-white font-cred-body">No</Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-
-                      {/* Student Loan Payment */}
-                      {formData.hasStudentLoan === 'yes' && (
-                        <div className="space-y-2">
+                      return (
+                        <div key={fieldName} className="space-y-2">
                           <Label className="text-white font-cred-body font-medium tracking-wide">
-                            STUDENT LOAN PAYMENT (₹)
+                            {config.label.toUpperCase()}
+                            <span className="text-white/60 text-sm font-normal ml-2">
+                              (Example: {config.example})
+                            </span>
                           </Label>
-                          <Input
-                            type="number"
-                            value={formData.studentLoanPayment}
-                            onChange={(e) => handleInputChange('studentLoanPayment', e.target.value)}
-                            className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                            placeholder="Enter monthly student loan payment"
-                            min="0"
-                          />
+
+                          {config.type === 'number' ? (
+                            <Input
+                              type="text"
+                              value={formData[fieldName as keyof FormData]}
+                              onChange={(e) => {
+                                // Only allow numbers
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                handleInputChange(fieldName as keyof FormData, value);
+                              }}
+                              className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
+                              placeholder={config.placeholder}
+                            />
+                          ) : config.type === 'select' ? (
+                            <Select
+                              value={formData[fieldName as keyof FormData]}
+                              onValueChange={(value) => handleInputChange(fieldName as keyof FormData, value)}
+                            >
+                              <SelectTrigger className="bg-black/20 border-white/20 text-white focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body">
+                                <SelectValue placeholder={config.placeholder} />
+                              </SelectTrigger>
+                              <SelectContent className="bg-black/90 border-white/20 text-white">
+                                {(config as any).options?.map((option: any) => (
+                                  <SelectItem key={option.value || option} value={option.value || option} className="focus:bg-white/10">
+                                    {option.label || option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : null}
                         </div>
-                      )}
-
-                      {/* Has Car Loan */}
-                      <div className="space-y-3">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          HAS CAR LOAN?
-                        </Label>
-                        <RadioGroup
-                          value={formData.hasCarLoan}
-                          onValueChange={(value) => handleInputChange('hasCarLoan', value)}
-                          className="flex space-x-6"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="yes" id="car-loan-yes" className="border-white/40 text-neon-blue" />
-                            <Label htmlFor="car-loan-yes" className="text-white font-cred-body">Yes</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="no" id="car-loan-no" className="border-white/40 text-neon-blue" />
-                            <Label htmlFor="car-loan-no" className="text-white font-cred-body">No</Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-
-                      {/* Car Loan Payment */}
-                      {formData.hasCarLoan === 'yes' && (
-                        <div className="space-y-2">
-                          <Label className="text-white font-cred-body font-medium tracking-wide">
-                            CAR LOAN PAYMENT (₹)
-                          </Label>
-                          <Input
-                            type="number"
-                            value={formData.carLoanPayment}
-                            onChange={(e) => handleInputChange('carLoanPayment', e.target.value)}
-                            className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                            placeholder="Enter monthly car loan payment"
-                            min="0"
-                          />
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-
-                  {/* Credit Behavior Section */}
-                  {currentSection === 5 && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6 }}
-                      className="space-y-6"
-                    >
-                      {/* Recent Credit Inquiries */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          RECENT CREDIT INQUIRIES (LAST 6 MONTHS)
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.recentCreditInquiries}
-                          onChange={(e) => handleInputChange('recentCreditInquiries', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter number of recent credit inquiries"
-                          min="0"
-                        />
-                      </div>
-
-                      {/* Late Payments */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          LATE PAYMENTS IN LAST 12 MONTHS
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.latePayments}
-                          onChange={(e) => handleInputChange('latePayments', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter number of late payments"
-                          min="0"
-                        />
-                      </div>
-
-                      {/* Bankruptcy History */}
-                      <div className="space-y-3">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          BANKRUPTCY HISTORY?
-                        </Label>
-                        <RadioGroup
-                          value={formData.bankruptcyHistory}
-                          onValueChange={(value) => handleInputChange('bankruptcyHistory', value)}
-                          className="flex space-x-6"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="yes" id="bankruptcy-yes" className="border-white/40 text-neon-blue" />
-                            <Label htmlFor="bankruptcy-yes" className="text-white font-cred-body">Yes</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="no" id="bankruptcy-no" className="border-white/40 text-neon-blue" />
-                            <Label htmlFor="bankruptcy-no" className="text-white font-cred-body">No</Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-
-                      {/* Years of Credit History */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-cred-body font-medium tracking-wide">
-                          YEARS OF CREDIT HISTORY
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.yearsOfCreditHistory}
-                          onChange={(e) => handleInputChange('yearsOfCreditHistory', e.target.value)}
-                          className="bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:border-neon-blue focus:ring-neon-blue/20 font-cred-body"
-                          placeholder="Enter years of credit history"
-                          min="0"
-                          step="0.5"
-                        />
-                      </div>
-                    </motion.div>
-                  )}
+                      );
+                    })}
+                  </motion.div>
                 </form>
 
                 {/* Navigation Buttons */}
