@@ -4,10 +4,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Download, 
-  TrendingUp, 
-  TrendingDown, 
+import FloatingChatButton from '@/components/FloatingChatButton';
+import {
+  Download,
+  TrendingUp,
+  TrendingDown,
   Calendar,
   Award,
   AlertCircle,
@@ -16,8 +17,7 @@ import {
   Clock,
   Star,
   Target,
-  Shield,
-  Zap
+  Shield
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import CreditScoreCalculator from '@/components/CreditScoreCalculator';
@@ -404,37 +404,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Floating Action Button */}
-      <motion.div
-        initial={{ scale: 0, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ duration: 0.6, delay: 1.5 }}
-        className="fixed bottom-8 right-8 z-50"
-      >
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          animate={{
-            boxShadow: [
-              "0 0 20px rgba(16, 185, 129, 0.3)",
-              "0 0 30px rgba(6, 214, 160, 0.4)",
-              "0 0 20px rgba(16, 185, 129, 0.3)"
-            ]
-          }}
-          transition={{
-            boxShadow: { duration: 2, repeat: Infinity },
-            scale: { duration: 0.2 }
-          }}
-          className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg"
-        >
-          <motion.div
-            animate={{ rotate: [0, 180, 360] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-          >
-            <Zap className="w-5 h-5 text-white" />
-          </motion.div>
-        </motion.div>
-      </motion.div>
+      {/* Floating Chat Button */}
+      <FloatingChatButton />
     </div>
   );
 };

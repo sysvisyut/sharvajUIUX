@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { 
-  User, 
-  Briefcase, 
-  Home, 
-  Users, 
-  CreditCard, 
+import FloatingChatButton from '@/components/FloatingChatButton';
+import {
+  User,
+  Briefcase,
+  Home,
+  Users,
+  CreditCard,
   TrendingUp,
   Calculator,
   Star,
@@ -677,6 +678,8 @@ const CheckScore = () => {
           </motion.div>
         </div>
       </div>
+      {/* Floating Chat Button */}
+      <FloatingChatButton />
     </div>
   );
 };
