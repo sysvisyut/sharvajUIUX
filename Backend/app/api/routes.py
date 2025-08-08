@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file, current_app
 from app.auth.auth import auth_required, get_current_user
 from app.models.database import Database, User, CreditScore, FinancialData, ChatHistory
 from app.services.ml_service import MLService
@@ -164,6 +164,7 @@ def get_insights():
         }), 500
 
 @api_bp.route('/chat', methods=['POST'])
+@api_bp.route('/chat/send', methods=['POST'])
 @auth_required
 def chat():
     """Handle chat requests"""
@@ -180,21 +181,32 @@ def chat():
                 'error': 'Message is required'
             }), 400
         
-        # Get user context for better responses
+        # Get user context for better responses (with error handling)
         user_context = None
-        score_data = CreditScore.find_latest_by_user(firebase_uid)
-        if score_data:
-            user_context = {
-                'credit_score': score_data.get('credit_score'),
-                'last_updated': score_data.get('created_at', '').strftime('%Y-%m-%d') if score_data.get('created_at') else None,
-                'loan_approved': score_data.get('loan_approved')
-            }
+        conversation_history = []
+
+        try:
+            score_data = CreditScore.find_latest_by_user(firebase_uid)
+            if score_data:
+                user_context = {
+                    'credit_score': score_data.get('credit_score'),
+                    'last_updated': score_data.get('created_at', '').strftime('%Y-%m-%d') if score_data.get('created_at') else None,
+                    'loan_approved': score_data.get('loan_approved')
+                }
+
+            # Get recent conversation history for context
+            conversation_history = ChatHistory.get_recent_messages(firebase_uid, limit=6)
+        except Exception as e:
+            current_app.logger.warning(f"Database error, proceeding without context: {str(e)}")
+
+        # Get response from chat service with conversation context
+        response = ChatService.send_message(message, user_context, conversation_history)
         
-        # Get response from chat service
-        response = ChatService.send_message(message, user_context)
-        
-        # Save chat history
-        ChatHistory.add_message(firebase_uid, message, response)
+        # Save chat history (with error handling)
+        try:
+            ChatHistory.add_message(firebase_uid, message, response)
+        except Exception as e:
+            current_app.logger.warning(f"Failed to save chat history: {str(e)}")
         
         return jsonify({
             'success': True,

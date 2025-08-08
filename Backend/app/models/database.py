@@ -141,3 +141,21 @@ class ChatHistory:
         return list(Database.get_collection(ChatHistory.COLLECTION).find(
             {'firebase_uid': firebase_uid}
         ).sort('timestamp', -1).limit(limit))
+
+    @staticmethod
+    def get_recent_messages(firebase_uid, limit=6):
+        """Get recent chat messages for conversation context"""
+        messages = list(Database.get_collection(ChatHistory.COLLECTION).find(
+            {'firebase_uid': firebase_uid}
+        ).sort('timestamp', -1).limit(limit))
+
+        # Convert to format expected by chat service
+        formatted_messages = []
+        for msg in reversed(messages):  # Reverse to get chronological order
+            formatted_messages.append({
+                'user_message': msg.get('message', ''),
+                'bot_response': msg.get('response', ''),
+                'timestamp': msg.get('timestamp')
+            })
+
+        return formatted_messages

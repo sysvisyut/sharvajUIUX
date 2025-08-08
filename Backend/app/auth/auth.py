@@ -108,11 +108,14 @@ def login():
 @auth_bp.route('/test-login', methods=['POST'])
 def test_login():
     """Test login for development/testing"""
-    if not current_app.config.get('DEBUG'):
-        return jsonify({'error': 'Test login only available in debug mode'}), 403
-    
+    if not (current_app.config.get('DEBUG') or current_app.config.get('BYPASS_AUTH')):
+        return jsonify({'error': 'Test login only available in debug mode or with auth bypass'}), 403
+
     return jsonify({
-        'message': 'Test login successful',
-        'token': 'test-token',
-        'user': {'uid': 'test-user-123', 'email': 'test@example.com'}
+        'success': True,
+        'data': {
+            'message': 'Test login successful',
+            'token': 'test-token',
+            'user': {'uid': 'test-user-123', 'email': 'test@example.com'}
+        }
     })

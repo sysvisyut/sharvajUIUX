@@ -6,46 +6,68 @@ class ChatService:
     """Service for handling chat with OpenRouter API"""
     
     @staticmethod
-    def send_message(message, user_context=None):
-        """Send message to OpenRouter API using Horizon Beta model"""
+    def send_message(message, user_context=None, conversation_history=None):
+        """Send message to OpenRouter API using configured model with conversation context"""
         try:
             api_key = current_app.config.get('OPENROUTER_API_KEY')
+            model = current_app.config.get('OPEN_ROUTER_MODEL')
             base_url = current_app.config.get('OPENROUTER_BASE_URL')
-            
+
+            current_app.logger.info(f"Chat request - Model: {model}, API Key present: {bool(api_key)}")
+
             if not api_key:
+                current_app.logger.warning("No OpenRouter API key configured, using fallback response")
                 return ChatService._fallback_response(message)
             
             # Prepare the prompt with context
             system_prompt = ChatService._build_system_prompt(user_context)
-            
+
             headers = {
                 'Authorization': f'Bearer {api_key}',
                 'Content-Type': 'application/json',
-                'HTTP-Referer': 'https://your-app-domain.com',
-                'X-Title': 'Credit Score Assistant'
+                'HTTP-Referer': 'https://realzilla-financial-advisor.com',
+                'X-Title': 'RealZilla AI Financial Advisor'
             }
-            
+
+            # Build conversation messages with history
+            messages = [{'role': 'system', 'content': system_prompt}]
+
+            # Add recent conversation history (last 6 messages for context)
+            if conversation_history:
+                recent_history = conversation_history[-6:] if len(conversation_history) > 6 else conversation_history
+                for hist_msg in recent_history:
+                    messages.append({'role': 'user', 'content': hist_msg.get('user_message', '')})
+                    messages.append({'role': 'assistant', 'content': hist_msg.get('bot_response', '')})
+
+            # Add current message
+            messages.append({'role': 'user', 'content': message})
+
             data = {
-                'model': 'meta-llama/llama-3.3-70b-instruct:free',  # llama model
-                'messages': [
-                    {'role': 'system', 'content': system_prompt},
-                    {'role': 'user', 'content': message}
-                ],
-                'max_tokens': 500,
-                'temperature': 0.7,
-                'top_p': 0.9
+                'model': model,
+                'messages': messages,
+                'max_tokens': 800,  # Increased for more detailed responses
+                'temperature': 0.8,  # Slightly more creative
+                'top_p': 0.95,      # Better response quality
+                'frequency_penalty': 0.1,  # Reduce repetition
+                'presence_penalty': 0.1    # Encourage diverse topics
             }
             
+            current_app.logger.info(f"Sending request to OpenRouter API: {base_url}/chat/completions")
+
             response = requests.post(
                 f'{base_url}/chat/completions',
                 headers=headers,
                 json=data,
                 timeout=30
             )
-            
+
+            current_app.logger.info(f"OpenRouter API response status: {response.status_code}")
+
             if response.status_code == 200:
                 result = response.json()
-                return result['choices'][0]['message']['content'].strip()
+                ai_response = result['choices'][0]['message']['content'].strip()
+                current_app.logger.info(f"OpenRouter API success - Response length: {len(ai_response)}")
+                return ai_response
             else:
                 current_app.logger.error(f"OpenRouter API error: {response.status_code} - {response.text}")
                 return ChatService._fallback_response(message)
@@ -57,22 +79,38 @@ class ChatService:
     @staticmethod
     def _build_system_prompt(user_context):
         """Build system prompt with user context"""
-        base_prompt = '''You are a helpful and knowledgeable credit score assistant. You help users understand their credit scores, improve their financial health, and answer questions about credit, loans, and personal finance.
+        base_prompt = '''You are an expert AI Financial Advisor with deep knowledge in personal finance, credit management, and wealth building. You communicate like a knowledgeable, friendly financial consultant who genuinely cares about helping people achieve financial success.
 
-Key responsibilities:
-- Explain credit scores and factors that affect them
-- Provide actionable advice for improving credit
-- Help users understand loan approval processes
-- Offer general financial wellness tips
-- Answer questions about credit reports and credit history
+CORE EXPERTISE:
+• Credit Score Optimization: Detailed strategies for improving FICO/VantageScore ratings
+• Debt Management: Avalanche vs. snowball methods, consolidation strategies, negotiation tactics
+• Budgeting & Cash Flow: 50/30/20 rule, zero-based budgeting, envelope method
+• Investment Planning: Index funds, 401(k) optimization, Roth vs. Traditional IRA
+• Loan Strategies: Mortgage qualification, refinancing, personal loans, auto loans
+• Credit Cards: Rewards optimization, balance transfers, utilization strategies
+• Emergency Planning: Building emergency funds, insurance needs, financial safety nets
 
-Guidelines:
-- Be encouraging and supportive
-- Provide practical, actionable advice
-- Explain complex financial concepts in simple terms
-- Never provide specific investment advice
-- Always recommend consulting with financial professionals for major decisions
-- Keep responses concise and helpful'''
+COMMUNICATION STYLE:
+• Conversational and engaging, like talking to a trusted financial advisor
+• Provide specific, actionable steps with clear timelines
+• Use real examples and numbers to illustrate points
+• Break down complex financial concepts into simple terms
+• Ask follow-up questions to provide personalized advice
+• Show empathy for financial struggles and celebrate progress
+• Be encouraging but realistic about timeframes for improvement
+
+RESPONSE FORMAT:
+• Start with a brief acknowledgment of their question/situation
+• Provide 2-3 specific, actionable recommendations
+• Include relevant examples or calculations when helpful
+• End with a follow-up question or next step suggestion
+• Keep responses conversational but informative (3-5 paragraphs)
+
+IMPORTANT GUIDELINES:
+• Always provide practical, implementable advice
+• Mention when to consult certified financial professionals for complex situations
+• Never guarantee specific outcomes or provide investment recommendations
+• Emphasize that financial improvement requires consistency and patience'''
 
         if user_context:
             context_info = f'''\n\nUser Context:

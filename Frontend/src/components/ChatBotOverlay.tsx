@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import APIService from '@/services/api';
 import {
   X,
   Send,
@@ -10,11 +11,7 @@ import {
   User,
   Minimize2,
   Maximize2,
-  MessageCircle,
   Sparkles,
-  TrendingUp,
-  DollarSign,
-  PieChart,
   Move
 } from 'lucide-react';
 
@@ -35,7 +32,7 @@ const ChatBotOverlay: React.FC<ChatBotOverlayProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "👋 Welcome! I'm your AI Financial Advisor, and I'm here to help you take control of your financial future! Whether you want to boost your credit score, crush debt, build savings, or start investing - I've got proven strategies that work. What financial goal can we tackle together today? 🚀",
+      text: "Hello! I'm your AI Financial Advisor. I'm here to help you with credit scores, budgeting, debt management, investing, and all aspects of personal finance. I can provide personalized advice based on your specific situation.\n\nWhat financial topic would you like to discuss today?",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -78,34 +75,18 @@ const ChatBotOverlay: React.FC<ChatBotOverlayProps> = ({ isOpen, onClose }) => {
     setIsTyping(true);
 
     try {
-      // Try to call the backend API
-      const response = await fetch('/api/chat/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: currentInput,
-          context: {
-            page: 'financial_advisor',
-            user_type: 'guest'
-          }
-        }),
-      });
+      // Call the backend API using APIService
+      const response = await APIService.sendChatMessage(currentInput);
 
-      if (response.ok) {
-        const data = await response.json();
-        const botResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          text: data.data.response,
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botResponse]);
-      } else {
-        throw new Error('API call failed');
-      }
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: response.response,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botResponse]);
     } catch (error) {
+      console.error('Chat API error:', error);
       // Fallback to local responses if API fails
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -143,14 +124,31 @@ const ChatBotOverlay: React.FC<ChatBotOverlayProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const quickSuggestions = [
-    "How can I boost my credit score by 100 points?",
-    "What's the fastest way to pay off debt?",
-    "Help me build an emergency fund",
+  const [quickSuggestions, setQuickSuggestions] = useState([
+    "How can I improve my credit score?",
+    "What's the best debt payoff strategy?",
+    "Help me create a budget",
     "Should I invest or pay off debt first?",
-    "How do I create a realistic budget?",
-    "What credit cards should I get?"
-  ];
+    "How much should I save for emergencies?",
+    "What credit card is right for me?"
+  ]);
+
+  // Load suggestions from API
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      try {
+        const response = await APIService.getChatSuggestions();
+        setQuickSuggestions(response.suggestions);
+      } catch (error) {
+        console.error('Failed to load chat suggestions:', error);
+        // Keep default suggestions if API fails
+      }
+    };
+
+    if (isOpen) {
+      loadSuggestions();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

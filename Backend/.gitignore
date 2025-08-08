@@ -263,9 +263,6 @@ uploads/
 temp/
 tmp/
 
-# Configuration files with secrets
-config.py
-local_config.py
 
 # API keys and secrets
 secrets.txt

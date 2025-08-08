@@ -116,7 +116,7 @@ class APIService {
 
   // Chat methods
   async sendChatMessage(message: string): Promise<ChatResponse> {
-    const response = await this.request<ChatResponse>("/api/chat", {
+    const response = await this.request<ChatResponse>("/api/chat/send", {
       method: "POST",
       body: JSON.stringify({ message }),
     });
