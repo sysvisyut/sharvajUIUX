@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, TrendingUp, Award, Target } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import OrbBackground from '@/components/ui/OrbBackground';
+import FloatingChatButton from '@/components/FloatingChatButton';
 
 const ScoreResult = () => {
   const [isCalculating, setIsCalculating] = useState(true);
@@ -337,6 +338,8 @@ const ScoreResult = () => {
           <ScoreDisplay key="score" />
         )}
       </AnimatePresence>
+      {/* Floating Chat Button */}
+      <FloatingChatButton />
     </div>
   );
 };

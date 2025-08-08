@@ -1,6 +1,7 @@
 import OrbBackground from "@/components/ui/OrbBackground"
 import Navigation from "@/components/Navigation"
 import HeroSection from "@/components/HeroSection"
+import FloatingChatButton from "@/components/FloatingChatButton"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -135,6 +136,9 @@ const Index = () => {
           </Card>
         </motion.div>
       </section>
+
+      {/* Floating Chat Button */}
+      <FloatingChatButton />
     </div>
   )
 }
