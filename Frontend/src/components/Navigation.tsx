@@ -10,7 +10,7 @@ const Navigation = () => {
   const backgroundColor = useTransform(
     scrollY,
     [0, 100],
-    ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.3)"]
+    ["rgba(0, 0, 0, 0.3)", "rgba(0, 0, 0, 0.8)"]
   )
 
   useEffect(() => {
@@ -22,10 +22,11 @@ const Navigation = () => {
 
   return (
     <motion.nav
-      style={{ 
+      style={{
         backgroundColor,
-        backdropFilter: 'blur(25px)',
-        WebkitBackdropFilter: 'blur(25px)'
+        backdropFilter: 'blur(200px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(200px) saturate(180%)',
+        zIndex: 190
       }}
       className={`fixed top-0 left-0 right-0 z-50 p-6 transition-all duration-300 ${
         isScrolled ? 'border-b border-white/10' : ''
